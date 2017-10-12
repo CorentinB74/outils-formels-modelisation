@@ -1,0 +1,29 @@
+digraph G {
+subgraph place {
+node [shape=circle, width=.5];
+"waitFlag" [label="1", xlabel="waitFlag"];
+"processPool" [label="0", xlabel="processPool"];
+"inProgress" [label="0", xlabel="inProgress"];
+"taskPool" [label="0", xlabel="taskPool"];
+}
+subgraph transitions {
+node [shape=rect, width=.5, height=.5];
+"exec";
+"create";
+"success";
+"fail";
+"spawn";
+}
+"taskPool" -> "exec";
+"waitFlag" -> "exec";
+"processPool" -> "exec";
+"exec" -> "inProgress";
+"exec" -> "taskPool";
+"create" -> "taskPool";
+"inProgress" -> "success";
+"taskPool" -> "success";
+"success" -> "waitFlag";
+"inProgress" -> "fail";
+"fail" -> "waitFlag";
+"spawn" -> "processPool";
+}

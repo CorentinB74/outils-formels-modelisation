@@ -50,15 +50,16 @@ func testNodes(markingGraph : MarkingGraph) -> (Bool, Bool){
   var seen = [markingGraph]
   var toVisit = [markingGraph]
 
-  var flag_testSmokers = false
-  var flag_testIngredients = false
-  var res = (Smokers : false, Ingredients : false)
+  var flag_testSmokers = false // indiquant si deux smokers en même temps on été trouver
+  var flag_testIngredients = false // indiquant si deux ingrédients sont présent en même temps
+  var res = (Smokers : false, Ingredients : false) // le resultat retournera un tuple de bool pour smokers et ingredient respectivement
 
   while let current = toVisit.popLast() {
     for (_, successor) in current.successors {
       if !seen.contains(where: { $0 === successor }){
         seen.append(successor)
         toVisit.append(successor)
+        // Reinitilisation des flags a false une fois le marquage parcouru
         var flag_s1 = false
         var flag_s2 = false
         var flag_s3 = false
@@ -66,23 +67,29 @@ func testNodes(markingGraph : MarkingGraph) -> (Bool, Bool){
         var flag_i1 = false
         var flag_i2 = false
         var flag_i3 = false
+        // Parcours du markage
         for (Key, Value) in current.marking{
           if !flag_testSmokers{
             if(!flag_s1){
+              // Operateur ternaire qui test si la clé s1 est bien a la valeur 1
               flag_s1 = (Key == s1, Value == 1) == (true, true) ? true : false
             }
             if(!flag_s2){
+              // Idem pour s2
               flag_s2 = (Key == s2, Value == 1) == (true, true) ? true : false
             }
             if(!flag_s3){
+              // Idem pour s3
               flag_s3 = (Key == s3, Value == 1) == (true, true) ? true : false
             }
+            // Test si deux flag on été activé
             if flag_s1 && flag_s2 || flag_s1 && flag_s3 || flag_s3 && flag_s2{
+              // Si oui les test sur les smokers sont fini donc activation du flag_testSmokers
               res.Smokers = true
               flag_testSmokers = true
             }
           }
-
+          // Parti identique que les smokers cependant appliqué aux ingrédients
           if !flag_testIngredients{
             if(!flag_i1){
               flag_i1 = (Key == p, Value > 1) == (true, true) ? true : false

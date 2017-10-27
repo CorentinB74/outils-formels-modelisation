@@ -1,9 +1,9 @@
-public class MarkingGraph {
+public class MarkingGraph { // noeud d'un graphe
 
     public typealias Marking = [String: Int]
 
-    public let marking   : Marking
-    public var successors: [String: MarkingGraph]
+    public let marking   : Marking // marquage d'un noeud
+    public var successors: [String: MarkingGraph] // arcs sortant du noeud
 
     public init(marking: Marking, successors: [String: MarkingGraph] = [:]) {
         self.marking    = marking
@@ -12,9 +12,34 @@ public class MarkingGraph {
 
 }
 
+// Passage par reference : inout
+func countNodes(markingGraph : MarkingGraph) -> Int{
+
+  var seen = [markingGraph]
+  var toVisit = [markingGraph]
+
+  while let current = toVisit.popLast() {
+    for (_, successor) in current.successors {
+      if !seen.contains(where: { $0 === successor }){
+        seen.append(successor)
+        toVisit.append(successor)
+        // if marking.first(where : { $0.1 > 1 }) != nil 
+      }
+    }
+  }
+
+  return seen.count
+}
+
 // Ex. 1: Mutual exclusion
 do {
-    // Write your code here ...
+    let m0 = MarkingGraph(marking: ["s0" : 1, "s1" : 0, "s2" : 1, "s3" : 0, "s4" : 1])
+    let m1 = MarkingGraph(marking: ["s0" : 1, "s1" : 0, "s2" : 0, "s3" : 1, "s4" : 0])
+    let m2 = MarkingGraph(marking: ["s0" : 0, "s1" : 1, "s2" : 0, "s3" : 0, "s4" : 1])
+
+    m0.successors = ["t3" : m1, "t1" : m2]
+    m1.successors = ["t2" : m0]
+    m2.successors = ["t0" : m0]
 }
 
 // Ex. 2: PetriNet 1
@@ -52,6 +77,8 @@ do {
     m6.successors = ["t1": m8]
     m7.successors = ["t4": m9]
     m8.successors = ["t2": m9]
+
+    print(countNodes(markingGraph : m0))
 
     // Write your code here ...
 }

@@ -1,6 +1,7 @@
 import PetriKit
 import PhilosophersLib
 
+/*
 do {
     enum C: CustomStringConvertible {
         case b, v, o
@@ -39,62 +40,39 @@ do {
         fatalError("Failed to fire.")
     }
     print(m2)
+
+
 }
 
 print()
 
 do {
-    let philosophers = lockFreePhilosophers(n: 3)
-    // let philosophers = lockablePhilosophers(n: 3)
+    //let philosophers = lockFreePhilosophers(n: 4)
+    let philosophers = lockablePhilosophers(n: 3)
     for m in philosophers.simulation(from: philosophers.initialMarking!).prefix(10) {
         print(m)
     }
+    print()
 }
-
+*/
 do {
-  // dom(Ingredients)
-  enum Ingredients {
-  case p,t,m
-  }
-  // dom(Smokers)
-  enum Smokers {
-  case mia, bob, tom
-  }
-  // dom(Referee)
-  enum Referee {
-  case rob
-  }
+    // Init des Predicate Net
+    let philosophers = lockFreePhilosophers(n: 5)
+    let philosophersLockable = lockablePhilosophers(n: 5)
 
-  // Types = { Ingredients, Smokers, Referee}
-  enum Types {
-  case ingredients(Ingredients)
-  case smokers(Smokers)
-  case referee(Referee)
-  }
+    // Init des Marking Graph
+    let Graph = philosophers.markingGraph(from: philosophers.initialMarking!)!
+    let GraphLockable = philosophersLockable.markingGraph(from: philosophersLockable.initialMarking!)!
 
-  let s = PredicateTransition<Types>(
-      preconditions: [
-          PredicateArc(place: "i", label: [.variable("x"), .variable("y")]),
-          PredicateArc(place: "s", label: [.variable("s")]),
-      ],
-      postconditions: [
-          PredicateArc(place: "r", label: [.function({ _ in .referee(.rob)})]),
-          PredicateArc(place: "w", label: [.variable("s")]),
-      ],
-      conditions    : [{ binding in
-          // Retrieve the indices of the philosopher and forks from the binding.
-          guard case let .smokers(s) = binding["s"]!,
-                case let .ingredients(x)      = binding["x"]!,
-                case let .ingredients(y)       = binding["y"]!
-          else {
-              return false
-          }
-
-          switch (s,x,y) {
-          case (.mia, .p, .t): return true
-          case (.tom, .p, .m): return true
-          case (.bob, .t, .m): return true
-          default: return false
-          }
-      }])
+    // Question 1
+    print("1) Number of nodes in a lockFreePhilo model with 5 philosophers :", Graph.count)
+    // Question 2
+    print("2) Number of nodes in a lockablePhilo model with 5 philosophers :", GraphLockable.count)
+    // Question 3
+    for node in GraphLockable{
+      if node.successors.isEmpty{
+        print("3) A dead lock marking :", node.marking)
+        break
+      }
+    }
 }

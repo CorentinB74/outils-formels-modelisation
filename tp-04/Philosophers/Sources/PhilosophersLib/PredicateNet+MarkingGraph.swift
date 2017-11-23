@@ -13,7 +13,52 @@ extension PredicateNet {
         // You may use these methods to check if you've already visited a marking, or if the model
         // is unbounded.
 
-        return nil
+      // Initialisation du graph du reseau de Petri
+      let CurrMarkingGraph = PredicateMarkingNode<T>(marking: marking)
+
+      // Initialisation de liste pour marquer les marquages
+      var seen = [CurrMarkingGraph]
+      var toVisit = [CurrMarkingGraph]
+
+
+      while let current = toVisit.popLast(){
+        for transition in self.transitions{
+          // On liste les bindings rendant la transition franchissable
+          let listBindings = transition.fireableBingings(from: current.marking)
+
+          // Init a nulle de la BindingMap qui est un dico de transitions et de binding
+          var BindMapToAdd : PredicateBindingMap<T> = [:]
+
+          // Parcours de tous ces bindings
+          for firealeBind in listBindings{
+
+            let currMarking = transition.fire(from: current.marking, with: firealeBind)!
+
+            // Test unbounded
+            if(seen.contains(where: { PredicateNet.greater(currMarking, $0.marking) })){
+              return nil
+            }
+            // Si le marquage etait deja present dans un autre noeud on rajoute un succesor vers celui-ci
+            if let previouslySeen : PredicateMarkingNode<T> = seen.first(where : { PredicateNet.equals($0.marking, currMarking) }){
+
+              BindMapToAdd[firealeBind] = previouslySeen
+              current.successors[transition] = BindMapToAdd
+              continue
+            }
+            // Si le marquage n'était présent nulle part alors on peut creer un nouveau noeud pour le graphe
+            let newSuccessor = PredicateMarkingNode<T>(marking: currMarking)
+
+            BindMapToAdd[firealeBind] = newSuccessor
+            current.successors[transition] = BindMapToAdd
+
+            toVisit.append(newSuccessor)
+            seen.append(newSuccessor)
+          }
+
+        }
+      }
+
+      return CurrMarkingGraph
     }
 
     // MARK: Internals

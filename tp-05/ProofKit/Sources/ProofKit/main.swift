@@ -4,6 +4,7 @@ let a: Formula = "a"
 let b: Formula = "b"
 let c: Formula = "c"
 let d: Formula = "d"
+let e: Formula = "e"
 let f = a || !(b && (c || d))
 print("Formula :", f)
 print("NNF :", f.nnf)
@@ -15,6 +16,12 @@ print("Formula :", f2)
 print("NNF :", f2.nnf)
 print("DNF :",f2.dnf)
 print("CNF :",f2.cnf)
+print("")
+let f3 = (a || (b || (c && e)))
+print("Formula :", f3)
+print("NNF :", f3.nnf)
+print("DNF :",f3.dnf)
+print("CNF :",f3.cnf)
 let booleanEvaluation = f.eval { (proposition) -> Bool in
     switch proposition {
         case "p": return true

@@ -70,53 +70,47 @@ public enum Formula {
         }
     }
 
-    /// The disjunctive normal form of the formula.
-    public var dnf: Formula {
+
+      /// The disjunctive normal form of the formula.
+      public var dnf: Formula {
+          let a = self.nnf
+          switch a {
+          case .conjunction(let b, let c):
+            switch (b.dnf,c.dnf) {
+            case (_, .disjunction(let d, let e)):
+              return (b.dnf && d.dnf).dnf || (b.dnf && e.dnf).dnf
+            case (.disjunction(let d, let e),_):
+              return (c.dnf && d.dnf).dnf || (c.dnf && e.dnf).dnf
+            default:
+              return b.dnf && c.dnf
+            }
+          case .disjunction(let b, let c):
+            return  b.dnf || c.dnf
+          default:
+            return a
+          }
+      }
+
+      /// The conjunctive normal form of the formula.
+      public var cnf: Formula {
         let a = self.nnf
         switch a {
-        case .conjunction(let b, let c):
-          switch (b,c) {
-          case (_, .disjunction(let d, let e)):
-            return (b.dnf && d.dnf) || (b.dnf && e.dnf)
-          case (.disjunction(let d, let e),_):
-            return (c.dnf && d.dnf) || (c.dnf && e.dnf)
-          case (_, .conjunction(_, _)):
-            return (b.dnf && c.dnf).dnf
-          case (.conjunction(_, _),_):
-            return (b.dnf && c.dnf).dnf
-          default:
-            return b.dnf && c.dnf
-          }
         case .disjunction(let b, let c):
-          return  b.dnf || c.dnf
+          switch (b.cnf,c.cnf) {
+          case (_, .conjunction(let d, let e)):
+            return (b.cnf || d.cnf).cnf && (b.cnf || e.cnf).cnf
+          case (.conjunction(let d, let e),_):
+            return (c.cnf || d.cnf).cnf && (c.cnf || e.cnf).cnf
+          default:
+            return b.cnf || c.cnf
+          }
+        case .conjunction(let b, let c):
+          return  b.cnf && c.cnf
         default:
           return a
         }
-    }
-
-    /// The conjunctive normal form of the formula.
-    public var cnf: Formula {
-      let a = self.nnf
-      switch a {
-      case .disjunction(let b, let c):
-        switch (b,c) {
-        case (_, .conjunction(let d, let e)):
-          return (b.cnf || d.cnf) && (b.cnf || e.cnf)
-        case (.conjunction(let d, let e),_):
-          return (c.cnf || d.cnf) && (c.cnf || e.cnf)
-        case (_, .disjunction(_, _)):
-          return (b.cnf || c.cnf).cnf
-        case (.disjunction(_, _),_):
-          return (b.cnf || c.cnf).cnf
-        default:
-          return b.cnf || c.cnf
-        }
-      case .conjunction(let b, let c):
-        return  b.cnf && c.cnf
-      default:
-        return a
       }
-    }
+
 
     /// The propositions the formula is based on.
     ///
